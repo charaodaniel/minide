@@ -123,11 +123,11 @@ Exemplo:
 ## Fase 1 — Base do projeto
 
 * [x] Estruturar Cargo Workspace
-* [ ] Criar núcleo do editor (core)
-* [ ] Implementar buffer de texto
-* [ ] Implementar abertura e salvamento de arquivos
-* [ ] Implementar carregamento de temas
-* [ ] Implementar sistema de ícones
+* [x] Criar núcleo do editor (core)
+* [x] Implementar buffer de texto
+* [x] Implementar abertura e salvamento de arquivos
+* [x] Implementar carregamento de temas
+* [x] Implementar sistema de ícones
 
 ---
 
