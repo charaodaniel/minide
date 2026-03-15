@@ -1,11 +1,12 @@
 mod app;
-mod editor;
 mod explorer;
+mod syntax;
 mod ui;
 
 use app::App;
 
 fn main() {
-    let mut app = App::new();
-    app.run();
+    if let Err(e) = App::new().run() {
+        eprintln!("Error: {}\n", e);
+    }
 }

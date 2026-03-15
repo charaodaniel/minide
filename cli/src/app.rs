@@ -1,7 +1,11 @@
 use crate::{explorer::Explorer, ui};
-use crossterm::event::{self, Event, KeyCode};
+use crossterm::{
+    event::{self, Event, KeyCode},
+    execute,
+    terminal::{self, Clear, ClearType},
+};
 use ratatui::{backend::CrosstermBackend, Terminal};
-use std::io;
+use std::io::{self, stdout};
 
 pub struct App {
     should_quit: bool,
@@ -18,23 +22,26 @@ impl App {
 
     pub fn run(&mut self) -> io::Result<()> {
         let mut terminal = Terminal::new(CrosstermBackend::new(io::stdout()))?;
-        crossterm::terminal::enable_raw_mode()?;
+        terminal::enable_raw_mode()?;
+        execute!(stdout(), Clear(ClearType::All))?;
 
         while !self.should_quit {
             self.draw(&mut terminal)?;
             self.handle_events()?;
         }
 
-        crossterm::terminal::disable_raw_mode()?;
+        terminal::disable_raw_mode()?;
+        execute!(stdout(), Clear(ClearType::All))?;
         Ok(())
     }
 
     fn handle_events(&mut self) -> io::Result<()> {
-        if let Event::Key(key) = event::read()? {
+        if let event::Key(key) = event::read()? {
             match key.code {
                 KeyCode::Char('q') => self.should_quit = true,
                 KeyCode::Up => self.explorer.scroll_up(),
                 KeyCode::Down => self.explorer.scroll_down(),
+                KeyCode::Enter => self.explorer.open_selected(),
                 _ => {}
             }
         }
