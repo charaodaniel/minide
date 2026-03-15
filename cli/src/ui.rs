@@ -1,7 +1,7 @@
 use crate::{explorer::Explorer, syntax};
 use ratatui::{
     layout::{Constraint, Direction, Layout},
-    style::{Color, Style},
+    style::{Color, Style, Modifier},
     text::{Line, Span, Text},
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame,
@@ -30,7 +30,7 @@ pub fn draw(f: &mut Frame, explorer: &mut Explorer) {
         .into_iter()
         .enumerate()
         .map(|(i, file)| {
-            let style = if i == explorer.selected {
+            let style = if i == explorer.selected_index {
                 Style::default().fg(Color::Black).bg(Color::White)
             } else {
                 Style::default()
@@ -55,7 +55,12 @@ pub fn draw(f: &mut Frame, explorer: &mut Explorer) {
     };
     
     let editor_panel = editor_chunks[0];
-    let editor_block = Block::default().title("Editor").borders(Borders::ALL);
+    let editor_title = if explorer.editor.is_editing {
+        "Editor"
+    } else {
+        "Preview"
+    };
+    let editor_block = Block::default().title(editor_title).borders(Borders::ALL);
 
     let lines: Vec<Line> = explorer.editor.content.iter().enumerate().map(|(line_idx, line_str)| {
         if explorer.editor.search_term.is_empty() {
@@ -132,7 +137,7 @@ pub fn draw(f: &mut Frame, explorer: &mut Explorer) {
                 search_panel.y + 1,
             )
         }
-    } else if explorer.editor.path.is_some() {
+    } else if explorer.editor.is_editing && explorer.editor.path.is_some() {
         f.set_cursor(
             editor_panel.x + 1 + explorer.editor.cursor_x as u16,
             editor_panel.y + 1 + explorer.editor.cursor_y as u16,
@@ -141,8 +146,10 @@ pub fn draw(f: &mut Frame, explorer: &mut Explorer) {
 
     let status_text = if explorer.editor.is_searching {
         "[ESC Cancel] [CTRL+N Next] [CTRL+P Prev]"
+    } else if explorer.editor.is_editing {
+        "[ESC Stop Editing] [CTRL+S Save] [CTRL+F Find] [CTRL+Q Quit]"
     } else {
-        "[CTRL+F Find] [CTRL+S Save] [CTRL+Q Quit]"
+        "[Enter Edit] [CTRL+S Save] [CTRL+F Find] [CTRL+Q Quit]"
     };
     let status_bar = Paragraph::new(status_text).block(Block::default());
     f.render_widget(status_bar, chunks[2]);

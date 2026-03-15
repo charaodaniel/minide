@@ -7,12 +7,13 @@ use crossterm::{
     execute,
     terminal::{self, Clear, ClearType},
 };
-use ratatui::{backend::CrosstermBackend, Terminal};
+use ratatui::{backend::CrosstermBackend, layout::{Direction, Layout, Constraint, Rect}, Terminal};
 use std::io::{self, stdout};
 
 pub struct App {
     should_quit: bool,
     explorer: Explorer,
+    size: Rect,
 }
 
 impl App {
@@ -20,6 +21,7 @@ impl App {
         Self {
             should_quit: false,
             explorer: Explorer::new(),
+            size: Rect::default(),
         }
     }
 
@@ -31,6 +33,8 @@ impl App {
             Clear(ClearType::All),
             EnableMouseCapture
         )?;
+
+        self.explorer.preview_selected(); // Initial preview
 
         while !self.should_quit {
             self.draw(&mut terminal)?;
@@ -55,12 +59,16 @@ impl App {
                             self.should_quit = true;
                         }
                         KeyCode::Char('s') => {
-                            if let Some(path) = &self.explorer.editor.path {
-                                std::fs::write(path, self.explorer.editor.get_content_as_string()).ok();
+                            if self.explorer.editor.is_editing {
+                                if let Some(path) = &self.explorer.editor.path {
+                                    std::fs::write(path, self.explorer.editor.get_content_as_string()).ok();
+                                }
                             }
                         }
                         KeyCode::Char('f') => {
-                            self.explorer.editor.is_searching = true;
+                            if self.explorer.editor.path.is_some() {
+                                self.explorer.editor.is_searching = true;
+                            }
                         }
                         KeyCode::Char('n') => self.explorer.editor.next_result(),
                         KeyCode::Char('p') => self.explorer.editor.previous_result(),
@@ -70,30 +78,48 @@ impl App {
                     match key.code {
                         KeyCode::Char(c) => self.explorer.editor.insert_char(c),
                         KeyCode::Backspace => self.explorer.editor.delete_char(),
-                        KeyCode::Escape => self.explorer.editor.cancel_search(),
+                        KeyCode::Esc => {
+                            if self.explorer.editor.is_searching {
+                                self.explorer.editor.cancel_search();
+                            } else if self.explorer.editor.is_editing {
+                                self.explorer.editor.is_editing = false;
+                            } else if self.explorer.editor.path.is_some() {
+                                self.explorer.editor.close();
+                            }
+                        }
                         KeyCode::Up => {
-                            if !self.explorer.editor.is_searching {
-                                self.explorer.editor.move_cursor_up()
+                            if self.explorer.editor.is_editing {
+                                self.explorer.editor.move_cursor_up();
+                            } else {
+                                self.explorer.select_previous();
                             }
                         }
                         KeyCode::Down => {
-                            if !self.explorer.editor.is_searching {
-                                self.explorer.editor.move_cursor_down()
+                            if self.explorer.editor.is_editing {
+                                self.explorer.editor.move_cursor_down();
+                            } else {
+                                self.explorer.select_next();
                             }
                         }
                         KeyCode::Left => {
-                            if !self.explorer.editor.is_searching {
-                                self.explorer.editor.move_cursor_left()
+                            if self.explorer.editor.is_editing {
+                                self.explorer.editor.move_cursor_left();
+                            } else {
+                                self.explorer.toggle_directory();
                             }
                         }
                         KeyCode::Right => {
-                            if !self.explorer.editor.is_searching {
-                                self.explorer.editor.move_cursor_right()
+                            if self.explorer.editor.is_editing {
+                                self.explorer.editor.move_cursor_right();
+                            } else {
+                                self.explorer.toggle_directory();
                             }
                         }
                         KeyCode::Enter => {
-                            if !self.explorer.editor.is_searching {
-                                self.explorer.open_selected()
+                            if self.explorer.editor.is_editing {
+                                self.explorer.editor.insert_newline();
+                            } else {
+                                self.explorer.open_selected();
                             }
                         }
                         _ => {}
@@ -110,45 +136,49 @@ impl App {
         if self.explorer.editor.is_searching {
             return;
         }
+
         match mouse_event.kind {
             MouseEventKind::ScrollUp => self.explorer.scroll_up(),
             MouseEventKind::ScrollDown => self.explorer.scroll_down(),
             MouseEventKind::Down(_) => {
-                let click_row = mouse_event.row as usize;
-                let click_col = mouse_event.column as usize;
-                
-                let chunks = ratatui::layout::Layout::default()
-                    .direction(ratatui::layout::Direction::Horizontal)
-                    .constraints([
-                        ratatui::layout::Constraint::Percentage(25),
-                        ratatui::layout::Constraint::Percentage(75),
-                    ])
-                    .split(ratatui::layout::Rect {
-                        x: 0,
-                        y: 3,
-                        width: mouse_event.column + 1,
-                        height: mouse_event.row + 1,
-                    });
-                let editor_panel = chunks[1];
+                let click_row = mouse_event.row;
+                let click_col = mouse_event.column;
 
-                if click_col < editor_panel.x {
-                    // Click is in the explorer
-                    let list_start_row = 4;
+                let app_chunks = Layout::default()
+                    .direction(Direction::Vertical)
+                    .constraints([Constraint::Length(3), Constraint::Min(0), Constraint::Length(1)].as_ref())
+                    .split(self.size);
+
+                let main_chunks = Layout::default()
+                    .direction(Direction::Horizontal)
+                    .constraints([Constraint::Percentage(25), Constraint::Percentage(75)].as_ref())
+                    .split(app_chunks[1]);
+
+                let explorer_panel = main_chunks[0];
+                let editor_panel = main_chunks[1];
+
+                if click_col >= explorer_panel.x && click_col < explorer_panel.x + explorer_panel.width &&
+                   click_row >= explorer_panel.y && click_row < explorer_panel.y + explorer_panel.height
+                {
+                    let list_start_row = explorer_panel.y + 1;
                     if click_row >= list_start_row {
-                        let new_selection = click_row - list_start_row;
-                        if new_selection < self.explorer.entries.len() {
-                            if self.explorer.selected == new_selection {
+                        let new_selection = (click_row - list_start_row) as usize;
+                        if new_selection < self.explorer.flat_list.len() {
+                            if self.explorer.selected_index == new_selection {
                                 self.explorer.open_selected();
                             } else {
-                                self.explorer.selected = new_selection;
+                                self.explorer.selected_index = new_selection;
+                                self.explorer.preview_selected();
                             }
                         }
                     }
-                } else {
-                    // Click is in the editor
+                } else if click_col >= editor_panel.x && click_col < editor_panel.x + editor_panel.width &&
+                          click_row >= editor_panel.y && click_row < editor_panel.y + editor_panel.height
+                {
                     if self.explorer.editor.path.is_some() {
-                        let y = (click_row as u16).saturating_sub(editor_panel.y) as usize;
-                        let x = (click_col as u16).saturating_sub(editor_panel.x + 1) as usize;
+                        self.explorer.editor.is_editing = true; // Start editing on click
+                        let y = (click_row).saturating_sub(editor_panel.y + 1) as usize;
+                        let x = (click_col).saturating_sub(editor_panel.x + 1) as usize;
 
                         self.explorer.editor.cursor_y = y.min(self.explorer.editor.content.len() - 1);
                         self.explorer.editor.cursor_x = x.min(self.explorer.editor.content[self.explorer.editor.cursor_y].len());
@@ -161,6 +191,7 @@ impl App {
 
     fn draw(&mut self, terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> io::Result<()> {
         terminal.draw(|f| {
+            self.size = f.size();
             ui::draw(f, &mut self.explorer);
         })?;
         Ok(())

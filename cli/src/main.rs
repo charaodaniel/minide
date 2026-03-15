@@ -1,6 +1,7 @@
 mod app;
 mod editor;
 mod explorer;
+mod git;
 mod syntax;
 mod ui;
 
