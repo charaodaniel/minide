@@ -1,4 +1,4 @@
+pub mod commands;
 pub mod editor;
-pub mod file;
-pub mod git;
-pub mod theme;
+pub mod view;
+pub mod tui;
