@@ -1,4 +1,4 @@
-use git2::{Repository, Status, Statuses};
+use git2::Repository;
 use std::path::Path;
 
 #[derive(Debug, Clone, PartialEq)]

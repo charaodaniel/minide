@@ -5,9 +5,9 @@ use crate::{
 };
 use ratatui::{
     layout::{Constraint, Direction, Layout},
-    style::{Color, Style, Modifier},
-    text::{Line, Span},
-    widgets::{Block, Borders, List, ListItem, Paragraph, Text},
+    style::{Color, Style},
+    text::{Line, Span, Text},
+    widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame,
 };
 

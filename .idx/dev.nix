@@ -2,7 +2,7 @@
 # see: https://firebase.google.com/docs/studio/customize-workspace
 { pkgs, ... }: {
   # Which nixpkgs channel to use.
-  channel = "stable-24.05"; # or "unstable"
+  channel = "unstable"; # or "unstable"
 
   # Use https://search.nixos.org/packages to find packages
   packages = [
@@ -10,6 +10,9 @@
     pkgs.rustc
     pkgs.gcc
     pkgs.perl
+    pkgs.gnumake
+    pkgs.pkg-config
+    pkgs.openssl
   ];
 
   # Sets environment variables in the workspace

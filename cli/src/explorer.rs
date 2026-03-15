@@ -145,7 +145,7 @@ impl Explorer {
             .collect()
     }
 
-    fn is_expanded(&self, path: &Path) -> bool {
+    pub fn is_expanded(&self, path: &Path) -> bool {
         find_node_by_path(&self.root, path).map_or(false, |n| n.is_expanded)
     }
 
