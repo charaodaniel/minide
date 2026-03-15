@@ -1,5 +1,5 @@
-use crate::buffer::Buffer;
-use ratatui::{prelude::*, widgets::Paragraph};
+use crate::{buffer::Buffer, color, theme::Theme};
+use ratatui::{prelude::*, widgets::{Block, Paragraph}};
 
 pub struct View {}
 
@@ -8,8 +8,14 @@ impl View {
         Self {}
     }
 
-    pub fn render(&self, frame: &mut Frame, buffer: &Buffer) {
+    pub fn render(&self, frame: &mut Frame, buffer: &Buffer, theme: &Theme) {
         let content = buffer.lines.join("\n");
-        frame.render_widget(Paragraph::new(content), frame.size());
+        let text_style = Style::default().fg(color::from_hex(&theme.text));
+        let bg_style = Style::default().bg(color::from_hex(&theme.background));
+
+        frame.render_widget(
+            Paragraph::new(content).style(text_style).block(Block::default().style(bg_style)),
+            frame.size(),
+        );
     }
 }

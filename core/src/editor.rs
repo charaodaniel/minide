@@ -1,10 +1,11 @@
-use crate::{buffer::Buffer, tui, view::View};
-use crossterm::event::{self, Event, KeyCode};
+use crate::{buffer::Buffer, theme::Theme, tui, view::View};
+use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
 
 pub struct Editor {
     should_quit: bool,
     view: View,
     buffer: Buffer,
+    theme: Theme,
 }
 
 impl Editor {
@@ -13,6 +14,7 @@ impl Editor {
             should_quit: false,
             view: View::new(),
             buffer: Buffer::open(path.unwrap_or_default()).unwrap_or_default(),
+            theme: Theme::load("catppuccin-mocha").unwrap(),
         }
     }
 
@@ -20,7 +22,9 @@ impl Editor {
         let mut terminal = tui::setup_terminal().expect("Failed to setup terminal");
 
         while !self.should_quit {
-            terminal.draw(|frame| self.view.render(frame, &self.buffer)).unwrap();
+            terminal
+                .draw(|frame| self.view.render(frame, &self.buffer, &self.theme))
+                .unwrap();
             self.handle_events();
         }
 
@@ -29,8 +33,27 @@ impl Editor {
 
     fn handle_events(&mut self) {
         if let Ok(Event::Key(key)) = event::read() {
-            if let KeyCode::Char('q') = key.code {
-                self.should_quit = true;
+            let KeyEvent { code, modifiers, .. } = key;
+            match (code, modifiers) {
+                (KeyCode::Char('q'), KeyModifiers::NONE) => {
+                    self.should_quit = true;
+                }
+                (KeyCode::Char('s'), KeyModifiers::CONTROL) => {
+                    self.buffer.save().unwrap_or_default();
+                }
+                (KeyCode::Up, _) => {
+                    // TODO: handle cursor movement
+                }
+                (KeyCode::Down, _) => {
+                    // TODO: handle cursor movement
+                }
+                (KeyCode::Left, _) => {
+                    // TODO: handle cursor movement
+                }
+                (KeyCode::Right, _) => {
+                    // TODO: handle cursor movement
+                }
+                _ => {}
             }
         }
     }
