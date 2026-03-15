@@ -1,15 +1,19 @@
-use crate::ui;
+use crate::{explorer::Explorer, ui};
 use crossterm::event::{self, Event, KeyCode};
 use ratatui::{backend::CrosstermBackend, Terminal};
 use std::io;
 
 pub struct App {
     should_quit: bool,
+    explorer: Explorer,
 }
 
 impl App {
     pub fn new() -> Self {
-        Self { should_quit: false }
+        Self {
+            should_quit: false,
+            explorer: Explorer::new(),
+        }
     }
 
     pub fn run(&mut self) -> io::Result<()> {
@@ -27,16 +31,19 @@ impl App {
 
     fn handle_events(&mut self) -> io::Result<()> {
         if let Event::Key(key) = event::read()? {
-            if key.code == KeyCode::Char('q') {
-                self.should_quit = true;
+            match key.code {
+                KeyCode::Char('q') => self.should_quit = true,
+                KeyCode::Up => self.explorer.scroll_up(),
+                KeyCode::Down => self.explorer.scroll_down(),
+                _ => {}
             }
         }
         Ok(())
     }
 
-    fn draw(&self, terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> io::Result<()> {
+    fn draw(&mut self, terminal: &mut Terminal<CrosstermBackend<io::Stdout>>) -> io::Result<()> {
         terminal.draw(|f| {
-            ui::draw(f);
+            ui::draw(f, &mut self.explorer);
         })?;
         Ok(())
     }

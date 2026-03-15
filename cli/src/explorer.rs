@@ -12,4 +12,16 @@ impl Explorer {
             .collect();
         Self { files, selected: 0 }
     }
+
+    pub fn scroll_up(&mut self) {
+        if self.selected > 0 {
+            self.selected -= 1;
+        }
+    }
+
+    pub fn scroll_down(&mut self) {
+        if self.selected < self.files.len() - 1 {
+            self.selected += 1;
+        }
+    }
 }
