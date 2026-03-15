@@ -1,11 +1,28 @@
-use crate::{explorer::Explorer, syntax};
+use crate::{
+    explorer::Explorer,
+    git::GitStatus,
+    syntax,
+};
 use ratatui::{
     layout::{Constraint, Direction, Layout},
     style::{Color, Style, Modifier},
-    text::{Line, Span, Text},
-    widgets::{Block, Borders, List, ListItem, Paragraph},
+    text::{Line, Span},
+    widgets::{Block, Borders, List, ListItem, Paragraph, Text},
     Frame,
 };
+
+fn get_git_status_color(status: &GitStatus) -> Color {
+    match status {
+        GitStatus::New => Color::Green,
+        GitStatus::Modified => Color::Yellow,
+        GitStatus::Deleted => Color::Red,
+        GitStatus::Renamed => Color::Cyan,
+        GitStatus::Typechange => Color::Magenta,
+        GitStatus::Untracked => Color::Gray,
+        GitStatus::Conflicted => Color::LightRed,
+        _ => Color::White,
+    }
+}
 
 pub fn draw(f: &mut Frame, explorer: &mut Explorer) {
     f.render_widget(Block::default(), f.size());
@@ -26,16 +43,57 @@ pub fn draw(f: &mut Frame, explorer: &mut Explorer) {
         .split(chunks[1]);
 
     let items: Vec<ListItem> = explorer
-        .get_files_for_display()
-        .into_iter()
+        .flat_list
+        .iter()
         .enumerate()
-        .map(|(i, file)| {
+        .map(|(i, (depth, path, git_status))| {
+            let is_dir = path.is_dir();
+            let prefix = "  ".repeat(*depth);
+            let icon = if is_dir {
+                if explorer.is_expanded(path) {
+                    "▼"
+                } else {
+                    "▶"
+                }
+            } else {
+                " "
+            };
+
+            let status_char = git_status.as_ref().map_or(' ', |s| match s {
+                GitStatus::New => 'A',
+                GitStatus::Modified => 'M',
+                GitStatus::Deleted => 'D',
+                GitStatus::Renamed => 'R',
+                GitStatus::Typechange => 'T',
+                GitStatus::Ignored => 'I',
+                GitStatus::Untracked => '?',
+                GitStatus::Conflicted => 'C',
+                GitStatus::Unmodified => ' ',
+            });
+
+            let git_color = git_status
+                .as_ref()
+                .map_or(Color::White, get_git_status_color);
+
+            let file_name = path.file_name().unwrap().to_str().unwrap();
+            let mut line = Line::from(vec![
+                Span::raw(prefix),
+                Span::raw(icon.to_string()),
+                Span::styled(
+                    format!(" {} ", status_char),
+                    Style::default().fg(git_color),
+                ),
+                Span::raw(file_name.to_string()),
+            ]);
+
             let style = if i == explorer.selected_index {
                 Style::default().fg(Color::Black).bg(Color::White)
             } else {
                 Style::default()
             };
-            ListItem::new(Text::from(file)).style(style)
+            
+            line.patch_style(style);
+            ListItem::new(line)
         })
         .collect();
 
@@ -53,7 +111,7 @@ pub fn draw(f: &mut Frame, explorer: &mut Explorer) {
             .constraints([Constraint::Min(0)].as_ref())
             .split(main_chunks[1])
     };
-    
+
     let editor_panel = editor_chunks[0];
     let editor_title = if explorer.editor.is_editing {
         "Editor"
