@@ -13,6 +13,20 @@ Ambas as versões compartilharão o mesmo núcleo de funcionalidades.
 
 ---
 
+# Modo de Uso
+
+Para executar o ambiente de desenvolvimento da versão GUI, certifique-se de ter o [Rust](https://www.rust-lang.org/tools/install) e o [Node.js](https://nodejs.org/) (com `pnpm`) instalados.
+
+Na raiz do projeto, execute o comando:
+
+```bash
+cargo tauri dev
+```
+
+Isso irá compilar o backend, instalar as dependências do frontend e iniciar a aplicação em modo de desenvolvimento.
+
+---
+
 # Objetivos do projeto
 
 * Criar um editor de código leve
@@ -148,7 +162,7 @@ Exemplo:
 * [x] Integrar Monaco Editor
 * [ ] Criar explorador de arquivos
 * [ ] Implementar sistema de abas
-* [ ] Integrar terminal
+* [x] Integrar terminal
 * [ ] Integrar Git
 
 ---
