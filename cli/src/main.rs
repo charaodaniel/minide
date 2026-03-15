@@ -1,6 +1,11 @@
-use core::editor::Editor;
+mod app;
+mod editor;
+mod explorer;
+mod ui;
+
+use app::App;
 
 fn main() {
-    let path = std::env::args().nth(1);
-    Editor::new(path.as_deref()).run();
+    let mut app = App::new();
+    app.run();
 }

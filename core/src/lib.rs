@@ -6,3 +6,4 @@ pub mod tui;
 pub mod buffer;
 pub mod theme;
 pub mod git;
+pub mod icons;

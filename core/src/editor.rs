@@ -1,4 +1,4 @@
-use crate::{buffer::Buffer, theme::Theme, tui, view::View};
+use crate::{buffer::Buffer, icons::Icons, theme::Theme, tui, view::View};
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyModifiers};
 
 pub struct Editor {
@@ -6,6 +6,7 @@ pub struct Editor {
     view: View,
     buffer: Buffer,
     theme: Theme,
+    icons: Icons,
 }
 
 impl Editor {
@@ -15,6 +16,7 @@ impl Editor {
             view: View::new(),
             buffer: Buffer::open(path.unwrap_or_default()).unwrap_or_default(),
             theme: Theme::load("catppuccin-mocha").unwrap(),
+            icons: Icons::load("default").unwrap(),
         }
     }
 
@@ -23,7 +25,7 @@ impl Editor {
 
         while !self.should_quit {
             terminal
-                .draw(|frame| self.view.render(frame, &self.buffer, &self.theme))
+                .draw(|frame| self.view.render(frame, &self.buffer, &self.theme, &self.icons))
                 .unwrap();
             self.handle_events();
         }
