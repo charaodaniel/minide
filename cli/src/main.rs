@@ -1,5 +1,6 @@
 use core::editor::Editor;
 
 fn main() {
-    Editor::new().run();
+    let path = std::env::args().nth(1);
+    Editor::new(path.as_deref()).run();
 }

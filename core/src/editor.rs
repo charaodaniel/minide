@@ -1,16 +1,18 @@
+use crate::{buffer::Buffer, tui, view::View};
 use crossterm::event::{self, Event, KeyCode};
-use crate::{tui, view::View};
 
 pub struct Editor {
     should_quit: bool,
     view: View,
+    buffer: Buffer,
 }
 
 impl Editor {
-    pub fn new() -> Self {
+    pub fn new(path: Option<&str>) -> Self {
         Self {
             should_quit: false,
             view: View::new(),
+            buffer: Buffer::open(path.unwrap_or_default()).unwrap_or_default(),
         }
     }
 
@@ -18,7 +20,7 @@ impl Editor {
         let mut terminal = tui::setup_terminal().expect("Failed to setup terminal");
 
         while !self.should_quit {
-            terminal.draw(|frame| self.view.render(frame)).unwrap();
+            terminal.draw(|frame| self.view.render(frame, &self.buffer)).unwrap();
             self.handle_events();
         }
 
