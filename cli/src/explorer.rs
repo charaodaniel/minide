@@ -1,3 +1,4 @@
+use crate::editor::Editor;
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -24,7 +25,7 @@ impl Entry {
 pub struct Explorer {
     pub entries: Vec<Entry>,
     pub selected: usize,
-    pub active_file: Option<String>,
+    pub editor: Editor,
 }
 
 impl Explorer {
@@ -43,7 +44,7 @@ impl Explorer {
         Self {
             entries,
             selected: 0,
-            active_file: None,
+            editor: Editor::new(),
         }
     }
 
@@ -69,7 +70,7 @@ impl Explorer {
 
         if !self.entries[self.selected].is_dir {
             let filename = self.entries[self.selected].path.clone();
-            self.active_file = fs::read_to_string(filename).ok();
+            self.editor.open(&filename);
             return;
         }
 
@@ -80,7 +81,9 @@ impl Explorer {
             // --- Collapse ---
             self.entries[self.selected].is_expanded = false;
             let mut end_of_children = self.selected + 1;
-            while end_of_children < self.entries.len() && self.entries[end_of_children].depth > start_depth {
+            while end_of_children < self.entries.len()
+                && self.entries[end_of_children].depth > start_depth
+            {
                 end_of_children += 1;
             }
             if end_of_children > self.selected + 1 {
@@ -99,7 +102,7 @@ impl Explorer {
                     .collect();
 
                 new_entries.sort_by(|a, b| {
-                     b.is_dir.cmp(&a.is_dir).then_with(|| a.name.cmp(&b.name))
+                    b.is_dir.cmp(&a.is_dir).then_with(|| a.name.cmp(&b.name))
                 });
 
                 for (i, new_entry) in new_entries.into_iter().enumerate() {
