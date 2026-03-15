@@ -9,6 +9,7 @@
     pkgs.cargo
     pkgs.rustc
     pkgs.gcc
+    pkgs.perl
   ];
 
   # Sets environment variables in the workspace
@@ -51,4 +52,3 @@
     };
   };
 }
-
