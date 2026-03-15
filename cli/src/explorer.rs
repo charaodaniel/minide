@@ -111,40 +111,6 @@ impl Explorer {
         build_flat_list_recursive(&mut self.flat_list, &self.root, 0);
     }
 
-    pub fn get_files_for_display(&self) -> Vec<String> {
-        self.flat_list
-            .iter()
-            .map(|(depth, path, git_status)| {
-                let is_dir = path.is_dir();
-                let prefix = "  ".repeat(*depth);
-                let icon = if is_dir {
-                    if self.is_expanded(path) {
-                        "▼"
-                    } else {
-                        "▶"
-                    }
-                } else {
-                    " "
-                };
-
-                let status_char = git_status.as_ref().map_or(' ', |s| match s {
-                    GitStatus::New => 'A',
-                    GitStatus::Modified => 'M',
-                    GitStatus::Deleted => 'D',
-                    GitStatus::Renamed => 'R',
-                    GitStatus::Typechange => 'T',
-                    GitStatus::Ignored => 'I',
-                    GitStatus::Untracked => '?',
-                    GitStatus::Conflicted => 'C',
-                    GitStatus::Unmodified => ' ',
-                });
-
-                let file_name = path.file_name().unwrap().to_str().unwrap();
-                format!("{} {} {} {}", prefix, icon, status_char, file_name)
-            })
-            .collect()
-    }
-
     pub fn is_expanded(&self, path: &Path) -> bool {
         find_node_by_path(&self.root, path).map_or(false, |n| n.is_expanded)
     }
