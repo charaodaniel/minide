@@ -2,12 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/style.css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>gui</title>
+    <title>MinIDE</title>
   </head>
   <body>
-    <div id="app"></div>
+    <div class="container">
+      <div id="sidebar">
+        <!-- O explorador de arquivos virá aqui -->
+        <p>Explorador</p>
+      </div>
+      <div id="main-area">
+        <div id="tabs-container">
+          <!-- As abas dos arquivos virão aqui -->
+        </div>
+        <div id="editor">
+          <!-- O Monaco Editor virá aqui -->
+          <p>Editor</p>
+        </div>
+        <div id="terminal">
+          <!-- O terminal virá aqui -->
+          <p>Terminal</p>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

@@ -1,0 +1,99 @@
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* Cores (Catppuccin-inspired) */
+  --background: #1e1e2e;
+  --foreground: #cdd6f4;
+  --sidebar-bg: #181825;
+  --editor-bg: #1e1e2e;
+  --terminal-bg: #11111b;
+  --tab-bg: #1e1e2e; /* Fundo da aba inativa */
+  --tab-active-bg: #313244; /* Fundo da aba ativa */
+  --tab-hover-bg: #45475a; /* Fundo da aba ao passar o mouse */
+  --border-color: #313244;
+
+  color-scheme: light dark;
+  color: var(--foreground);
+  background-color: var(--background);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  height: 100%;
+}
+
+#sidebar {
+  width: 250px;
+  background-color: var(--sidebar-bg);
+  padding: 10px;
+}
+
+#main-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#tabs-container {
+  display: flex;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto; /* Permite rolar se houver muitas abas */
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background-color: var(--tab-bg);
+  border-right: 1px solid var(--border-color);
+  cursor: pointer;
+  font-size: 14px;
+  white-space: nowrap; /* Impede que o nome do arquivo quebre a linha */
+}
+
+.tab:hover {
+  background-color: var(--tab-hover-bg);
+}
+
+.tab.active {
+  background-color: var(--tab-active-bg);
+}
+
+.tab .close-tab {
+  margin-left: 8px;
+  padding: 2px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.tab .close-tab:hover {
+  background-color: var(--tab-hover-bg);
+}
+
+
+#editor {
+  flex: 1;
+  background-color: var(--editor-bg);
+}
+
+#terminal {
+  height: 200px;
+  background-color: var(--terminal-bg);
+  padding: 10px;
+}

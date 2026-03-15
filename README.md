@@ -145,7 +145,7 @@ Exemplo:
 ## Fase 3 — Editor GUI
 
 * [x] Criar interface com Tauri
-* [ ] Integrar Monaco Editor
+* [x] Integrar Monaco Editor
 * [ ] Criar explorador de arquivos
 * [ ] Implementar sistema de abas
 * [ ] Integrar terminal

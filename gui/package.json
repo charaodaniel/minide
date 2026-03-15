@@ -10,5 +10,17 @@
   },
   "devDependencies": {
     "vite": "^8.0.0"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.10.1",
+    "monaco-editor": "^0.55.1",
+    "plugins-workspace": "github:tauri-apps/plugins-workspace#v2",
+    "xterm": "^5.3.0",
+    "xterm-addon-fit": "^0.8.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@tauri-apps/plugin-pty": "npm:plugins-workspace@0.0.0"
+    }
   }
 }
