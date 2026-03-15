@@ -133,18 +133,18 @@ Exemplo:
 
 ## Fase 2 — Editor CLI
 
-* [ ] Criar interface TUI
-* [ ] Implementar navegação de arquivos
-* [ ] Implementar syntax highlight
-* [ ] Implementar atalhos de teclado
-* [ ] Implementar busca de texto
-* [ ] Implementar integração básica com Git
+* [x] Criar interface TUI
+* [x] Implementar navegação de arquivos
+* [x] Implementar syntax highlight
+* [x] Implementar atalhos de teclado
+* [x] Implementar busca de texto
+* [x] Implementar integração básica com Git
 
 ---
 
 ## Fase 3 — Editor GUI
 
-* [ ] Criar interface com Tauri
+* [x] Criar interface com Tauri
 * [ ] Integrar Monaco Editor
 * [ ] Criar explorador de arquivos
 * [ ] Implementar sistema de abas
